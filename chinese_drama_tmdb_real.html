@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C-Drama Hub | Premium</title>
+  
+  <!-- Fonts & Icons (Preconnect for performance) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Noto Sans Thai"', 'sans-serif'] },
+          colors: { 
+            brand: { 50: '#fff1f2', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
+            surface: '#121214',
+            surfaceSoft: '#1c1c1f',
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: 0, transform: 'translateY(15px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* CSS Optimizations */
+    body { background-color: #09090b; color: #fafafa; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    
+    .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; transform: translateZ(0); /* Hardware accel */ }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .custom-scrollbar { scroll-behavior: smooth; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(225, 29, 72, 0.4); }
+    
+    .glass { background: rgba(28, 28, 31, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .glass-card { background: linear-gradient(180deg, rgba(28, 28, 31, 0.8) 0%, rgba(18, 18, 20, 0.9) 100%); border: 1px solid rgba(255, 255, 255, 0.03); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .text-shadow { text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    
+    /* Image Loading Animation for Grid Cards */
+    img.lazy-load { transition: opacity 0.3s ease; opacity: 0; }
+    img.lazy-load.loaded { opacity: 1; }
+  </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Background Ambient Lights -->
+  <div class="bg-blobs">
+    <div class="blob bg-brand-600 w-96 h-96 top-[-10%] left-[-10%] animate-pulse-slow"></div>
+    <div class="blob bg-blue-600 w-[500px] h-[500px] bottom-[-20%] right-[-10%] animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav id="navbar" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent border-b border-transparent pt-4 pb-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 text-white font-black text-2xl md:text-3xl tracking-tight cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
+          <i class="fa-solid fa-play text-white text-sm ml-1"></i>
+        </div>
+        C-DRAMA
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- Desktop Search -->
+        <div class="relative hidden md:block w-64 lg:w-80 transition-all group" id="searchContainerDesktop">
+          <input type="text" id="searchInput" placeholder="ค้นหาซีรี่ย์..." autocomplete="off" class="w-full glass rounded-full py-2.5 pl-12 pr-10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-500 focus:bg-white/10 transition-all placeholder:text-gray-400" oninput="handleInputSearch(event, true)"/>
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-400 transition-colors pointer-events-none"></i>
+          <button id="clearSearchBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white hidden" onclick="clearSearch(true)"><i class="fa-solid fa-xmark"></i></button>
+          
+          <div id="autocompleteDesktop" class="absolute top-full mt-2 left-0 w-full glass-card rounded-2xl overflow-hidden hidden flex-col max-h-80 overflow-y-auto custom-scrollbar z-50 shadow-2xl border border-white/10 opacity-0 transition-opacity duration-200"></div>
+        </div>
+
+        <button onclick="toggleMobileSearch()" class="md:hidden w-10 h-10 rounded-full glass flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <button onclick="toggleSettings()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors group relative">
+          <i class="fa-solid fa-gear group-hover:rotate-90 transition-transform duration-500"></i>
+          <span id="apiKeyDot" class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#09090b] rounded-full"></span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Search Bar -->
+    <div id="mobileSearch" class="hidden px-4 pt-4 pb-2 md:hidden relative z-50">
+      <div class="relative w-full" id="searchContainerMobile">
+        <input type="text" id="searchInputMobile" placeholder="ค้นหาซีรี่ย์..." autocomplete="off" class="w-full glass rounded-full py-3 pl-12 pr-10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-500" oninput="handleInputSearch(event, false)"/>
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        <button id="clearSearchBtnMobile" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white hidden" onclick="clearSearch(false)"><i class="fa-solid fa-xmark"></i></button>
+        <div id="autocompleteMobile" class="absolute top-full mt-2 left-0 w-full glass-card rounded-2xl overflow-hidden hidden flex-col max-h-72 overflow-y-auto custom-scrollbar shadow-2xl border border-white/10 opacity-0 transition-opacity duration-200"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="if(event.target === this) toggleSettings()">
+    <div class="glass-card rounded-3xl w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300" id="settingsContent">
+      <button onclick="toggleSettings()" class="absolute top-5 right-5 text-gray-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+      <div class="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-500 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-key"></i></div>
+      <h2 class="text-2xl font-bold text-white mb-2">ตั้งค่าระบบ (API)</h2>
+      <p class="text-gray-400 text-sm mb-6 leading-relaxed">เพื่อให้เว็บไซต์ดึงข้อมูลจริงจาก TMDB กรุณาใส่ API Read Access Token</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">TMDB API Token</label>
+          <input type="password" id="apiKeyInput" placeholder="eyJhbGciOiJIUzI1NiJ9..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono transition-all">
+        </div>
+        <div class="flex gap-3">
+          <button onclick="saveKey()" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-xl font-medium text-sm transition-all shadow-lg shadow-brand-500/25">บันทึกรหัส</button>
+          <button onclick="resetKey()" class="px-5 glass hover:bg-white/10 text-gray-300 rounded-xl font-medium text-sm transition-all border border-white/5">ล้างค่า</button>
+        </div>
+      </div>
+      <div id="apiStatusText" class="mt-4 text-center text-xs font-medium text-red-400">สถานะ: ใช้ข้อมูลจำลอง</div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32 min-h-screen">
+    
+    <div class="mb-10 space-y-6 animate-fade-in-up">
+      <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">สำรวจ<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-orange-400">ซีรี่ย์จีน</span></h1>
+      
+      <div class="flex flex-col gap-4">
+        <!-- Tabs -->
+        <div id="tabsContainer" class="flex space-x-2 bg-black/40 backdrop-blur-md p-1.5 rounded-2xl w-full overflow-x-auto custom-scrollbar border border-white/5 pb-2">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Genres -->
+        <div id="genresContainer" class="flex items-center gap-2 overflow-x-auto custom-scrollbar w-full pb-3 pt-1">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Area -->
+    <div id="errorBox" class="hidden mb-6 glass border-red-500/30 text-red-400 px-5 py-4 rounded-2xl text-sm flex items-center gap-3 shadow-lg shadow-red-500/10">
+      <i class="fa-solid fa-circle-exclamation text-lg"></i> <span id="errorText"></span>
+    </div>
+    <div id="infoBar" class="text-gray-400 text-sm mb-6 flex items-center gap-2 font-medium"></div>
+
+    <!-- Content Grid -->
+    <div id="contentGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-7"></div>
+
+    <!-- Pagination -->
+    <div id="paginationArea" class="mt-16 flex justify-center items-center gap-3"></div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 bg-black/50 backdrop-blur-lg mt-12 py-8 text-center text-gray-500 text-xs md:text-sm font-light">
+    <p>C-Drama Hub Premium © 2026. ข้อมูลอ้างอิงจาก TMDB API</p>
+  </footer>
+
+  <!-- Detail Modal -->
+  <div id="modalOverlay" class="fixed inset-0 z-50 hidden items-end md:items-center justify-center bg-black/80 backdrop-blur-xl opacity-0 transition-opacity duration-300" onclick="closeModal(event)">
+    <div id="modalContent" class="w-full md:max-w-5xl h-[85vh] md:h-[80vh] bg-surfaceSoft md:rounded-3xl rounded-t-3xl overflow-hidden shadow-2xl relative transform translate-y-10 transition-transform duration-300 flex flex-col md:flex-row" onclick="event.stopPropagation()"></div>
+  </div>
+
+  <script>
+    /** * C-Drama Hub: Performance Optimized Core
+     */
+
+    // --- Configuration ---
+    const TMDB = {
+      IMG_500: 'https://image.tmdb.org/t/p/w500',
+      IMG_BIG: 'https://image.tmdb.org/t/p/w1280',
+      IMG_LOGO: 'https://image.tmdb.org/t/p/w154',
+      BASE_URL: 'https://api.themoviedb.org/3'
+    };
+    
+    const GENRE_TH = {
+      'historical': { name: 'ย้อนยุค', icon: '<i class="fa-solid fa-vihara text-red-400 mr-1.5"></i>' }, 
+      10749: { name: 'โรแมนติก', icon: '<i class="fa-solid fa-heart text-pink-400 mr-1.5"></i>' }, 
+      35: { name: 'คอมเมดี้', icon: '<i class="fa-solid fa-face-laugh-squint text-yellow-400 mr-1.5"></i>' }, 
+      18: { name: 'ดราม่า', icon: '<i class="fa-solid fa-masks-theater text-purple-400 mr-1.5"></i>' }, 
+      10765: { name: 'แฟนตาซี', icon: '<i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>' }, 
+      10759: { name: 'แอ็กชั่นผจญภัย', icon: '<i class="fa-solid fa-khanda text-orange-400 mr-1.5"></i>' }, 
+      9648: { name: 'ลึกลับ', icon: '<i class="fa-solid fa-user-secret text-gray-400 mr-1.5"></i>' }
+    };
+
+    const TABS = {
+      'popular': { label: 'ยอดนิยม', icon: '<i class="fa-solid fa-fire text-orange-300 mr-1.5"></i>' },
+      'on_the_air': { label: 'กำลังออนแอร์', icon: '<i class="fa-solid fa-tv text-blue-400 mr-1.5"></i>' },
+      'airing_today': { label: 'ออนแอร์วันนี้', icon: '<i class="fa-solid fa-calendar-day text-emerald-400 mr-1.5"></i>' },
+      'upcoming': { label: 'กำลังจะเข้าฉาย', icon: '<i class="fa-solid fa-hourglass-half text-purple-400 mr-1.5"></i>' },
+      'top_rated': { label: 'คะแนนสูงสุด', icon: '<i class="fa-solid fa-star text-amber-400 mr-1.5"></i>' }
+    };
+
+    // --- Core State Management ---
+    const appState = {
+      apiKey: localStorage.getItem('tmdb_api_key') || '',
+      isMockMode: !(localStorage.getItem('tmdb_api_key')),
+      tab: 'popular',
+      genre: null,
+      search: '',
+      page: 1,
+      totalPages: 1,
+      cachedData: new Map(), // O(1) Lookups
+      autocompleteCache: new Map(),
+      searchTimeout: null
+    };
+
+    // --- DOM Cache ---
+    const DOM = {
+      searchInputDesktop: document.getElementById('searchInput'),
+      searchInputMobile: document.getElementById('searchInputMobile'),
+      clearBtns: [document.getElementById('clearSearchBtn'), document.getElementById('clearSearchBtnMobile')],
+      dropdownDesktop: document.getElementById('autocompleteDesktop'),
+      dropdownMobile: document.getElementById('autocompleteMobile'),
+      contentGrid: document.getElementById('contentGrid'),
+      tabsContainer: document.getElementById('tabsContainer'),
+      genresContainer: document.getElementById('genresContainer'),
+      pagination: document.getElementById('paginationArea'),
+      infoBar: document.getElementById('infoBar'),
+      modalOverlay: document.getElementById('modalOverlay'),
+      modalContent: document.getElementById('modalContent')
+    };
+
+    // --- Initialization ---
+    function init() {
+      updateApiUI();
+      renderNavigation();
+      setupEvents();
+      fetchList();
+    }
+
+    // --- UI Behaviors ---
+    function toggleSettings() {
+      const modal = document.getElementById('settingsModal');
+      const content = document.getElementById('settingsContent');
+      if(modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+      } else {
+        modal.classList.add('opacity-0'); content.classList.add('scale-95');
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+      }
+    }
+
+    function toggleMobileSearch() {
+      const ms = document.getElementById('mobileSearch');
+      ms.classList.toggle('hidden');
+      if(!ms.classList.contains('hidden')) {
+        DOM.searchInputMobile.focus();
+      } else {
+        hideAutocompletes();
+      }
+    }
+
+    function updateFilter({ tab, genre, search, page }) {
+      if (tab !== undefined) appState.tab = tab;
+      if (genre !== undefined) appState.genre = genre;
+      if (search !== undefined) appState.search = search;
+      if (page !== undefined) appState.page = page; else appState.page = 1;
+
+      // Sync Inputs
+      DOM.searchInputDesktop.value = appState.search;
+      DOM.searchInputMobile.value = appState.search;
+      DOM.clearBtns.forEach(btn => btn.classList.toggle('hidden', !appState.search));
+      
+      hideAutocompletes();
+      renderNavigation();
+      fetchList();
+      
+      if (page === undefined) window.scrollTo({ top: DOM.genresContainer.offsetTop - 100, behavior: 'smooth' });
+    }
+
+    function renderNavigation() {
+      // Render Tabs
+      let tabsHtml = '';
+      for (const [id, data] of Object.entries(TABS)) {
+        const isActive = appState.tab === id && !appState.search;
+        const classes = isActive 
+          ? 'active bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg' 
+          : 'text-gray-400 hover:text-white hover:bg-white/5';
+        tabsHtml += `<button onclick="updateFilter({tab: '${id}', search: '', genre: null})" class="px-5 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${classes}">${data.icon}${data.label}</button>`;
+      }
+      DOM.tabsContainer.innerHTML = tabsHtml;
+
+      // Render Genres
+      const isAllActive = !appState.genre && !appState.search;
+      let genresHtml = `<button onclick="updateFilter({genre: null, search: ''})" class="px-5 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${isAllActive ? 'bg-white/10 text-white border border-white/20' : 'glass text-gray-400 hover:text-white hover:bg-white/10 border border-transparent'}"><i class="fa-solid fa-border-all text-blue-400 mr-1.5"></i> ทั้งหมด</button>`;
+      
+      for (const [id, data] of Object.entries(GENRE_TH)) {
+        const isActive = appState.genre === id && !appState.search;
+        const classes = isActive 
+          ? 'bg-white/10 text-white border border-white/20' 
+          : 'glass text-gray-400 hover:text-white hover:bg-white/10 border border-transparent';
+        genresHtml += `<button onclick="updateFilter({genre: '${id}', search: ''})" class="px-5 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${classes}">${data.icon}${data.name}</button>`;
+      }
+      DOM.genresContainer.innerHTML = genresHtml;
+    }
+
+    // --- Search & Autocomplete ---
+    function handleInputSearch(e, isDesktop) {
+      clearTimeout(appState.searchTimeout);
+      const query = e.target.value.trim();
+      const dropdown = isDesktop ? DOM.dropdownDesktop : DOM.dropdownMobile;
+      
+      DOM.clearBtns[isDesktop ? 0 : 1].classList.toggle('hidden', !query);
+
+      if (!query) {
+        hideAutocompletes();
+        return;
+      }
+
+      appState.searchTimeout = setTimeout(() => executeAutocomplete(query, dropdown, isDesktop), 400); // Throttled
+    }
+
+    async function executeAutocomplete(query, dropdownEl, isDesktop) {
+      dropdownEl.innerHTML = `<div class="p-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-circle-notch fa-spin text-brand-500 text-lg mb-2"></i><br>กำลังค้นหาพรีวิว...</div>`;
+      dropdownEl.classList.remove('hidden');
+      setTimeout(() => dropdownEl.classList.remove('opacity-0'), 10);
+
+      if (appState.isMockMode) {
+        const results = getMockData().filter(d => d.titleTh.toLowerCase().includes(query.toLowerCase()) || d.titleEn.toLowerCase().includes(query.toLowerCase()));
+        renderAutocompleteResults(results, dropdownEl, isDesktop);
+        return;
+      }
+
+      try {
+        const url = `${TMDB.BASE_URL}/search/tv?query=${encodeURIComponent(query)}&language=th-TH`;
+        const res = await fetchApi(url);
+        let results = (res.results || []).filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN')).slice(0, 5);
+        renderAutocompleteResults(results, dropdownEl, isDesktop);
+      } catch (e) {
+        dropdownEl.innerHTML = `<div class="p-3 text-center text-red-400 text-xs">ค้นหาล้มเหลว</div>`;
+      }
+    }
+
+    function renderAutocompleteResults(results, dropdownEl, isDesktop) {
+      if (results.length === 0) {
+        dropdownEl.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm"><i class="fa-solid fa-ghost text-2xl mb-2 opacity-50"></i><br>ไม่พบผลลัพธ์</div>`;
+        return;
+      }
+
+      let html = results.map(s => {
+        appState.autocompleteCache.set(s.id, s);
+        const title = s.name || s.original_name || s.titleTh;
+        const year = s.first_air_date ? s.first_air_date.substring(0,4) : (s.year || '');
+        const imgUrl = appState.isMockMode ? s.cover : (s.poster_path ? `${TMDB.IMG_LOGO}${s.poster_path}` : `https://placehold.co/100x150/1c1c1f/475569?text=X`);
+        const rating = s.vote_average ? s.vote_average.toFixed(1) : (s.rating || 0);
+
+        return `
+        <div class="flex items-center gap-3 p-3 hover:bg-white/10 cursor-pointer transition-colors border-b border-white/5 last:border-0" onclick="hideAutocompletes(); showDetail(${s.id}, true)">
+            <img src="${imgUrl}" class="w-10 h-14 object-cover rounded shadow-md" alt="">
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-bold text-white truncate">${title}</div>
+                <div class="text-[10px] text-gray-400 mt-1">${year} <span class="mx-1">•</span> <i class="fa-solid fa-star text-amber-400"></i> ${rating}</div>
+            </div>
+        </div>`;
+      }).join('');
+      
+      const currentVal = isDesktop ? DOM.searchInputDesktop.value : DOM.searchInputMobile.value;
+      html += `<div class="p-3 text-center bg-black/50 hover:bg-brand-600/20 text-brand-400 text-xs cursor-pointer font-medium" onclick="updateFilter({search: '${currentVal}'})">ดูผลลัพธ์ทั้งหมด &rarr;</div>`;
+      dropdownEl.innerHTML = html;
+    }
+
+    function clearSearch(isDesktop) {
+      if (isDesktop) {
+        DOM.searchInputDesktop.value = '';
+      } else {
+        DOM.searchInputMobile.value = '';
+      }
+      hideAutocompletes();
+      updateFilter({search: ''});
+    }
+
+    // --- Main Fetch Strategy (Progressive Enhancement) ---
+    async function fetchList() {
+      DOM.contentGrid.innerHTML = `
+        <div class="col-span-full flex flex-col items-center justify-center py-32 text-center">
+          <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+          <p class="text-gray-400 text-xs tracking-widest uppercase">${appState.isMockMode ? 'Loading Mock Data...' : 'Syncing Data...'}</p>
+        </div>`;
+      DOM.pagination.innerHTML = '';
+      DOM.infoBar.innerHTML = '';
+
+      if (appState.isMockMode) {
+        let filtered = getMockData();
+        if (appState.search) filtered = filtered.filter(d => d.titleTh.toLowerCase().includes(appState.search.toLowerCase()) || d.titleEn.toLowerCase().includes(appState.search.toLowerCase()));
+        if (appState.genre) filtered = filtered.filter(d => d.genres.includes(appState.genre) || d.genres.includes(parseInt(appState.genre)));
+        
+        appState.totalPages = 1;
+        filtered.forEach(item => appState.cachedData.set(item.id, item));
+        renderGrid(filtered, filtered.length);
+        if(!document.getElementById('mockBanner')) DOM.infoBar.innerHTML += `<span id="mockBanner" class="ml-auto bg-brand-500/20 text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-500/20">ระบบจำลองข้อมูล</span>`;
+        return;
+      }
+
+      try {
+        const url = buildApiUrl();
+        const data = await fetchApi(url);
+        
+        let results = (data.results || []).filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN'));
+        if (!appState.search) results = results.filter(s => s.poster_path); 
+
+        appState.totalPages = Math.min(data.total_pages || 1, 500);
+        
+        // 1. Render Basic Grid Instantly (Fast Perceived Performance)
+        results.forEach(item => appState.cachedData.set(item.id, item));
+        renderGrid(results, data.total_results);
+        renderPager();
+
+        // 2. Fetch Detailed Info (Episodes & Credits) Lazily in Background
+        lazyFetchDetails(results);
+
+      } catch (e) {
+        DOM.contentGrid.innerHTML = '<div class="col-span-full text-center py-20 text-red-400 glass rounded-2xl">ขัดข้องในการเชื่อมต่อระบบ</div>';
+      }
+    }
+
+    function buildApiUrl() {
+      if (appState.search) return `${TMDB.BASE_URL}/search/tv?query=${encodeURIComponent(appState.search)}&page=${appState.page}&language=th-TH`;
+      
+      let sortAndFilter = 'sort_by=popularity.desc';
+      const d = new Date();
+      const today = d.toISOString().split('T')[0];
+      
+      if (appState.tab === 'top_rated') sortAndFilter = 'sort_by=vote_average.desc&vote_count.gte=30';
+      else if (appState.tab === 'on_the_air') {
+        d.setDate(d.getDate() - 30);
+        sortAndFilter = `sort_by=popularity.desc&air_date.gte=${d.toISOString().split('T')[0]}&air_date.lte=${today}`;
+      }
+      else if (appState.tab === 'airing_today') sortAndFilter = `sort_by=popularity.desc&air_date.gte=${today}&air_date.lte=${today}`;
+      else if (appState.tab === 'upcoming') {
+        d.setDate(d.getDate() + 1);
+        sortAndFilter = `sort_by=popularity.desc&first_air_date.gte=${d.toISOString().split('T')[0]}`;
+      }
+
+      let genreFilter = '';
+      if (appState.genre === 'historical') genreFilter = '&with_keywords=241951|170425|310557|311100'; 
+      else if (appState.genre) genreFilter = `&with_genres=${appState.genre}`;
+
+      return `${TMDB.BASE_URL}/discover/tv?with_original_language=zh&with_origin_country=CN&${sortAndFilter}${genreFilter}&page=${appState.page}&language=th-TH`;
+    }
+
+    // Lazy load specific data (prevents N+1 blocking) - Added credits and providers for background syncing
+    async function lazyFetchDetails(results) {
+      results.forEach(async (s) => {
+        try {
+          const detail = await fetchApi(`${TMDB.BASE_URL}/tv/${s.id}?language=th-TH&append_to_response=watch/providers,credits`);
+          appState.cachedData.set(s.id, { ...s, ...detail }); // Merge detail into cache
+          
+          // Update specific badge UI
+          const badgeEl = document.getElementById(`badge-ep-${s.id}`);
+          if (badgeEl) {
+            badgeEl.innerHTML = getEpisodeStatusText(detail, false, true);
+            badgeEl.classList.remove('opacity-50', 'animate-pulse'); // Remove loading state
+          }
+        } catch (e) { /* Ignore background fetch errors silently */ }
+      });
+    }
+
+    function renderGrid(shows, total) {
+      if (!shows || shows.length === 0) {
+        DOM.contentGrid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-24 text-center"><div class="text-5xl text-gray-600 mb-4"><i class="fa-solid fa-ghost"></i></div><h3 class="text-xl font-bold text-gray-300">ไม่พบซีรี่ย์ที่ตรงตามเงื่อนไข</h3></div>`;
+        return;
+      }
+
+      DOM.infoBar.innerHTML = `<i class="fa-solid fa-layer-group text-brand-500"></i> พบ ${total.toLocaleString()} เรื่อง`;
+
+      DOM.contentGrid.innerHTML = shows.map((s, idx) => {
+        const title = s.name || s.original_name || s.titleTh;
+        const year = s.first_air_date ? s.first_air_date.substring(0,4) : (s.year || '');
+        const imgUrl = appState.isMockMode ? s.cover : (s.poster_path ? `${TMDB.IMG_500}${s.poster_path}` : `https://placehold.co/400x600/1c1c1f/475569?text=No+Poster`);
+        const rating = s.vote_average ? s.vote_average.toFixed(1) : (s.rating || 0);
+        
+        // Initial Badge State (will be updated via lazyFetchDetails if real API)
+        const badgeState = appState.isMockMode 
+          ? getEpisodeStatusText(s, true, true) 
+          : `<i class="fa-solid fa-spinner fa-spin"></i> โหลดข้อมูล`;
+        const badgeClasses = appState.isMockMode ? '' : 'opacity-50 animate-pulse';
+
+        // NOTE: ใช้คลาส lazy-load แทน loading="lazy" เพื่อให้ CSS ควบคุมได้อย่างถูกต้อง และไม่กระทบป๊อปอัป
+        return `
+          <div class="group cursor-pointer animate-fade-in-up" style="animation-delay: ${idx * 15}ms" onclick="showDetail(${s.id})">
+            <div class="relative aspect-[2/3] rounded-2xl overflow-hidden bg-surfaceSoft mb-3 shadow-lg transition-transform duration-300 group-hover:-translate-y-1.5 group-hover:ring-1 group-hover:ring-brand-500/50">
+              <img src="${imgUrl}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 lazy-load" onload="this.classList.add('loaded')" alt="">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100"></div>
+              
+              <div class="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-start z-10 gap-1.5">
+                <div class="glass px-2 py-1 rounded-md text-white text-[10px] font-medium flex items-center gap-1.5 shadow-xl bg-black/60 border border-white/10 truncate max-w-[75%] ${badgeClasses}">
+                  <i class="fa-solid fa-list-ol text-brand-400"></i> <span id="badge-ep-${s.id}" class="truncate">${badgeState}</span>
+                </div>
+                ${rating > 0 ? `<div class="glass px-2 py-1 rounded-md text-amber-400 text-[10px] font-black flex items-center gap-1 shadow-xl shrink-0 bg-black/60 border border-white/10"><i class="fa-solid fa-star"></i> ${rating}</div>` : ''}
+              </div>
+            </div>
+            <div class="px-1">
+              <h3 class="text-gray-100 font-semibold text-sm line-clamp-2 leading-tight group-hover:text-brand-400 transition-colors">${title}</h3>
+              <p class="text-gray-500 text-xs mt-1">${year} ${appState.isMockMode?'':'• 🇨🇳'}</p>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // --- Detail Modal ---
+    async function showDetail(id, fromAutocomplete = false) {
+      if (!fromAutocomplete) hideAutocompletes();
+      
+      let s = appState.cachedData.get(id) || appState.autocompleteCache.get(id);
+      
+      DOM.modalOverlay.classList.remove('hidden');
+      DOM.modalOverlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        DOM.modalOverlay.classList.remove('opacity-0');
+        DOM.modalContent.classList.remove('translate-y-10');
+      }, 10);
+      
+      DOM.modalContent.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center"><div class="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-4"></div></div>`;
+
+      if (appState.isMockMode) {
+        renderModal(s, true);
+        return;
+      }
+
+      try {
+        // Fetch full providers & cast data only when modal opens
+        const detail = await fetchApi(`${TMDB.BASE_URL}/tv/${id}?language=th-TH&append_to_response=watch/providers,credits`);
+        appState.cachedData.set(id, detail); // Save back
+        renderModal(detail, false);
+      } catch (e) {
+        DOM.modalContent.innerHTML = `<button onclick="closeModal(event, true)" class="absolute top-4 right-4 z-20 glass w-10 h-10 rounded-full text-white"><i class="fa-solid fa-xmark"></i></button><div class="flex h-full items-center justify-center text-red-400">ดึงข้อมูลไม่สำเร็จ</div>`;
+      }
+    }
+
+    function renderModal(d, isMock) {
+      const title = d.name || d.titleTh;
+      const originalTitle = d.original_name || d.titleEn || '';
+      const imgUrl = isMock ? d.cover : (d.poster_path ? `${TMDB.IMG_BIG}${d.poster_path}` : `https://placehold.co/600x900/1c1c1f/475569?text=No+Image`);
+      const rating = d.vote_average ? d.vote_average.toFixed(1) : (d.rating || 0);
+      const year = d.first_air_date ? d.first_air_date.substring(0,4) : (d.year || '');
+      
+      const episodeStatusHtml = getEpisodeStatusText(d, isMock, false);
+      
+      // Cast / Actor Extraction
+      let castHtml = '';
+      if (isMock && d.cast) {
+        castHtml = d.cast.join(', ');
+      } else if (!isMock && d.credits?.cast?.length > 0) {
+        castHtml = d.credits.cast.slice(0, 6).map(c => c.name).join(', ');
+      }
+
+      // Provider Extraction (with Logo + Text)
+      let providersHtml = '';
+      let hasThaiDub = false;
+      const dubPlatforms = ['WeTV', 'iQIYI', 'TrueID', 'Viu', 'Netflix', 'Monomax']; 
+
+      if (isMock && d.providers) {
+        providersHtml = d.providers.map(p => `
+          <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1 pr-3 shadow-md">
+            <img src="https://image.tmdb.org/t/p/original${p.logo_path}" class="w-8 h-8 rounded-lg object-cover" alt="${p.provider_name}">
+            <span class="text-xs text-gray-200 font-medium">${p.provider_name}</span>
+          </div>`).join('');
+        hasThaiDub = true;
+      } else if (!isMock && d.watch?.providers?.results?.TH) {
+        const th = d.watch.providers.results.TH;
+        const allProviders = [...(th.flatrate || []), ...(th.free || [])].reduce((acc, cur) => acc.find(i => i.provider_id === cur.provider_id) ? acc : [...acc, cur], []); 
+        
+        providersHtml = allProviders.map(p => {
+          if(dubPlatforms.includes(p.provider_name)) hasThaiDub = true;
+          return `
+          <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1 pr-3 shadow-md">
+            <img src="https://image.tmdb.org/t/p/original${p.logo_path}" class="w-8 h-8 rounded-lg object-cover bg-white" alt="${p.provider_name}">
+            <span class="text-xs text-gray-200 font-medium">${p.provider_name}</span>
+          </div>`;
+        }).join('');
+      }
+
+      // Fallback: ถ้าไม่พบแพลตฟอร์มสตรีมมิ่งในไทย ให้แสดงข้อมูลช่องต้นทางแทน (Networks with Logo + Text)
+      let fallbackNetworkHtml = '';
+      if (!providersHtml && d.networks && d.networks.length > 0) {
+        fallbackNetworkHtml = d.networks.map(n => {
+          const logoImg = n.logo_path ? `<img src="https://image.tmdb.org/t/p/w154${n.logo_path}" class="h-6 w-auto max-w-[60px] object-contain bg-white/90 p-1 rounded-md" alt="${n.name}">` : `<div class="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg"><i class="fa-solid fa-tv text-gray-400"></i></div>`;
+          return `
+          <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1 pr-3 shadow-md">
+            ${logoImg}
+            <span class="text-xs text-gray-200 font-medium">${n.name}</span>
+          </div>`;
+        }).join('');
+      }
+
+      if(!isMock && d.popularity > 500 && (!providersHtml && !fallbackNetworkHtml)) hasThaiDub = true; 
+
+      const genresHtml = (d.genres || []).map(g => {
+        let nameObj = isMock ? (GENRE_TH[g] || {name: g, icon:''}) : (GENRE_TH[g.id] || {name: g.name, icon:''});
+        return `<span class="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">${nameObj.icon || ''}${nameObj.name || (isMock ? g : g.name)}</span>`;
+      }).join('');
+
+      // เอา loading="lazy" และคลาส opacity ออกจากรูปภาพหลักใน Modal เพื่อให้มั่นใจว่าจะแสดงผลทันทีที่ป๊อปอัปเปิด (แก้ปัญหาจอดำ)
+      DOM.modalContent.innerHTML = `
+        <button onclick="closeModal(event, true)" class="absolute top-4 right-4 z-30 glass hover:bg-brand-600 w-10 h-10 flex items-center justify-center rounded-full text-white transition-colors shadow-xl"><i class="fa-solid fa-xmark"></i></button>
+
+        <div class="w-full md:w-[45%] h-[35vh] md:h-full relative shrink-0 bg-surface">
+          <img src="${imgUrl}" class="w-full h-full object-cover" alt="">
+          <div class="absolute inset-0 bg-gradient-to-t from-surfaceSoft via-transparent to-black/30 md:bg-gradient-to-r md:from-transparent md:via-surfaceSoft/50 md:to-surfaceSoft"></div>
+          ${hasThaiDub ? `<div class="absolute top-4 left-4 z-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-md shadow-lg flex items-center gap-1"><i class="fa-solid fa-microphone-lines"></i> พากย์ไทย</div>` : ''}
+        </div>
+
+        <div class="p-6 md:p-10 flex flex-col w-full h-[65vh] md:h-full overflow-y-auto custom-scrollbar relative z-10">
+          <div class="flex items-center gap-3 mb-4 text-xs font-semibold text-brand-400">
+            <span>${year}</span> <span class="w-1 h-1 rounded-full bg-gray-600"></span>
+            <span class="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded border border-white/10"><i class="fa-solid fa-list-ol"></i> ${episodeStatusHtml}</span>
+          </div>
+
+          <h2 class="text-3xl md:text-4xl font-black text-white mb-2 leading-tight">${title}</h2>
+          <h3 class="text-sm md:text-base text-gray-400 font-light mb-6">${originalTitle}</h3>
+
+          ${rating > 0 ? `
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500"><i class="fa-solid fa-star"></i></div>
+            <div>
+              <div class="text-white font-bold leading-none">${rating} <span class="text-gray-500 text-xs font-normal">/ 10</span></div>
+              <div class="text-gray-500 text-[10px] mt-1">${d.vote_count ? d.vote_count.toLocaleString() + ' โหวต' : 'TMDB Rating'}</div>
+            </div>
+          </div>` : ''}
+
+          <div class="flex flex-wrap gap-2 mb-6">${genresHtml}</div>
+          
+          ${castHtml ? `
+          <div class="mb-5">
+            <h4 class="text-white font-semibold mb-2 text-sm tracking-wide">นักแสดงนำ</h4>
+            <p class="text-gray-300 text-sm font-light leading-relaxed">${castHtml}</p>
+          </div>` : ''}
+
+          <div class="mb-8 flex-1">
+            <h4 class="text-white font-semibold mb-2 text-sm tracking-wide">เรื่องย่อ</h4>
+            <p class="text-gray-300 text-sm leading-relaxed font-light opacity-90">${d.overview || d.synopsis || 'ยังไม่มีเรื่องย่อภาษาไทย...'}</p>
+          </div>
+
+          <div class="pt-5 border-t border-white/5">
+            <h4 class="text-gray-400 text-xs uppercase mb-3 tracking-wider">รับชมถูกลิขสิทธิ์ / เครือข่ายต้นทาง</h4>
+            <div class="flex flex-wrap items-center gap-2">${providersHtml || fallbackNetworkHtml || '<div class="text-gray-500 text-xs">ไม่พบข้อมูลเครือข่ายหรือสตรีมมิ่ง</div>'}</div>
+          </div>
+        </div>`;
+    }
+
+    // --- Utilities ---
+    async function fetchApi(url) {
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${appState.apiKey}`, 'accept': 'application/json' }});
+      if (res.status === 401) { resetKey(); toggleSettings(); throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
+    function getEpisodeStatusText(d, isMock, isCard) {
+      if (isMock) {
+        if (d.status === 'Ended') return isCard ? `จบแล้ว ${d.episodes}` : `จบแล้ว (${d.episodes} ตอน)`;
+        return isCard ? `ออนแอร์ ${d.airedEpisodes}/${d.episodes}` : `ออนแอร์ไปแล้ว ${d.airedEpisodes}/${d.episodes} ตอน`;
+      } 
+      
+      const isEnded = d.status === 'Ended' || d.status === 'Canceled';
+      const totalEps = d.number_of_episodes || '?';
+      
+      if (isEnded) return isCard ? `จบแล้ว ${totalEps}` : `จบแล้ว (${totalEps} ตอน)`;
+      if (d.status === 'Upcoming' || (d.first_air_date && new Date(d.first_air_date) > new Date())) return isCard ? `รอออนแอร์` : `รอออนแอร์ (${totalEps} ตอน)`;
+      
+      const airedEps = d.last_episode_to_air?.episode_number || '?';
+      if (airedEps !== '?' && totalEps !== '?') return isCard ? `ออนแอร์ ${airedEps}/${totalEps}` : `ออนแอร์ไปแล้ว ${airedEps}/${totalEps} ตอน`;
+      if (totalEps !== '?') return isCard ? `กำลังออนแอร์` : `กำลังออนแอร์ (${totalEps} ตอน)`;
+      return `กำลังออนแอร์`;
+    }
+
+    function hideAutocompletes() {
+      DOM.dropdownDesktop.classList.add('hidden', 'opacity-0');
+      DOM.dropdownMobile.classList.add('hidden', 'opacity-0');
+    }
+
+    function closeModal(e, force = false) {
+      if (force || e.target === DOM.modalOverlay) {
+        DOM.modalContent.classList.add('translate-y-10');
+        DOM.modalOverlay.classList.add('opacity-0');
+        setTimeout(() => {
+          DOM.modalOverlay.classList.add('hidden');
+          DOM.modalOverlay.classList.remove('flex');
+          document.body.style.overflow = ''; 
+        }, 300);
+      }
+    }
+
+    function renderPager() {
+      if (appState.totalPages <= 1) { DOM.pagination.innerHTML = ''; return; }
+      const pC = appState.page <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white';
+      const nC = appState.page >= appState.totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white';
+      
+      DOM.pagination.innerHTML = `
+        <button onclick="if(appState.page > 1) updateFilter({page: ${appState.page - 1}})" class="glass w-10 h-10 rounded-full flex justify-center items-center text-gray-300 transition-colors ${pC}"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="text-gray-300 text-sm font-medium px-4">หน้า ${appState.page} / ${appState.totalPages}</span>
+        <button onclick="if(appState.page < appState.totalPages) updateFilter({page: ${appState.page + 1}})" class="glass w-10 h-10 rounded-full flex justify-center items-center text-gray-300 transition-colors ${nC}"><i class="fa-solid fa-chevron-right"></i></button>`;
+    }
+
+    function updateApiUI() {
+      appState.isMockMode = !appState.apiKey;
+      document.getElementById('apiKeyDot').className = `absolute top-0 right-0 w-3 h-3 border-2 border-[#09090b] rounded-full ${appState.apiKey ? 'bg-emerald-500' : 'bg-red-500'}`;
+      document.getElementById('apiStatusText').innerHTML = appState.apiKey ? '<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> เชื่อมต่อฐานข้อมูลจริง</span>' : '<span class="text-red-400">ใช้ข้อมูลจำลอง (Mock Data)</span>';
+      document.getElementById('apiKeyInput').value = appState.apiKey;
+    }
+
+    function saveKey() {
+      const val = document.getElementById('apiKeyInput').value.trim();
+      if (!val) return;
+      appState.apiKey = val;
+      localStorage.setItem('tmdb_api_key', val);
+      updateApiUI(); updateFilter({page: 1}); setTimeout(toggleSettings, 300);
+    }
+
+    function resetKey() {
+      appState.apiKey = ''; localStorage.removeItem('tmdb_api_key');
+      updateApiUI(); updateFilter({page: 1});
+    }
+
+    function setupEvents() {
+      [DOM.searchInputDesktop, DOM.searchInputMobile].forEach(input => {
+        input.addEventListener('keydown', e => { 
+          if(e.key === 'Enter') {
+            hideAutocompletes();
+            updateFilter({search: e.target.value.trim()});
+          } 
+        });
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('searchContainerDesktop').contains(e.target)) DOM.dropdownDesktop.classList.add('hidden', 'opacity-0');
+        if (!document.getElementById('searchContainerMobile').contains(e.target)) DOM.dropdownMobile.classList.add('hidden', 'opacity-0');
+      });
+
+      window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 20) {
+          nav.classList.add('glass', 'shadow-lg', 'border-b', 'border-white/5', 'pt-3', 'pb-3');
+          nav.classList.remove('bg-transparent', 'border-transparent', 'pt-4', 'pb-4');
+        } else {
+          nav.classList.remove('glass', 'shadow-lg', 'border-b', 'border-white/5', 'pt-3', 'pb-3');
+          nav.classList.add('bg-transparent', 'border-transparent', 'pt-4', 'pb-4');
+        }
+      });
+    }
+
+    function getMockData() {
+      return [
+        { id: 1, titleTh: "หาญท้าชะตาฟ้า ปริศนายุทธจักร", titleEn: "Joy of Life", cover: "https://image.tmdb.org/t/p/w500/yJ0D7aFh0Y4BwGqWjWJpG5z5y2j.jpg", rating: 8.8, status: "Returning Series", year: "2019", episodes: 46, airedEpisodes: 30, genres: [18, 10765, 'historical'], synopsis: "ฟ่านเสียน ชายหนุ่มผู้มีภูมิหลังลึกลับ เติบโตมาพร้อมกับความรู้จากยุคปัจจุบัน...", providers: [{logo_path: "/xS3tWwB7T4kofO90oN1Z8Qz7T8y.jpg", provider_name: "WeTV"}], cast: ["จางรั่วอวิ๋น", "หลี่ชิ่น", "เฉินเต้าหมิง"] },
+        { id: 2, titleTh: "แอบรักให้เธอรู้", titleEn: "Hidden Love", cover: "https://image.tmdb.org/t/p/w500/yF1eOkaXXibxHEcDFvS14n1tWjG.jpg", rating: 8.6, status: "Ended", year: "2023", episodes: 25, airedEpisodes: 25, genres: [10749, 35], synopsis: "ซางจื้อ แอบชอบเพื่อนของพี่ชายมาตั้งแต่เด็ก ความรักวัยรุ่นที่เติบโตเป็นความรักที่มั่นคง...", providers: [{logo_path: "/e2qD0mP1wK4J1FzQZ9f9TzQ3G1y.jpg", provider_name: "Netflix"}], cast: ["จ้าวลู่ซือ", "เฉินเจ๋อหยวน", "หม่าป๋อเชียน"] },
+        { id: 3, titleTh: "สื่อรักปีศาจจิ้งจอก", titleEn: "Fox Spirit Matchmaker", cover: "https://image.tmdb.org/t/p/w500/m1wPjZq9W8zX8K9p6p5oWjZq9W8.jpg", rating: 8.0, status: "Ended", year: "2024", episodes: 36, airedEpisodes: 36, genres: [10765, 'historical'], synopsis: "เรื่องราวความรักระหว่างมนุษย์และปีศาจจิ้งจอก...", providers: [{logo_path: "/qIqO1gZq9W8zX8K9p6p5oWjZq9W8.jpg", provider_name: "iQIYI"}], cast: ["หยางมี่", "กงจวิ้น", "กัวเสี่ยวถิง"] }
+      ];
+    }
+
+    // Run
+    init();
+  </script>
+</body>
+</html>
