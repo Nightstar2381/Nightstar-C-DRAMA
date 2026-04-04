@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>C-Drama Hub | Premium V2</title>
+  <title>Series By Night Star | C-Drama Hub</title>
   
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,12 +40,11 @@
   </script>
 
   <style>
-    /* CSS Optimizations & Light/Dark Adjustments */
     body { overflow-x: hidden; -webkit-font-smoothing: antialiased; transition: background-color 0.3s, color 0.3s; }
     
     .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
     .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; transform: translateZ(0); }
-    html:not(.dark) .blob { opacity: 0.08; } /* Softer blobs in light mode */
+    html:not(.dark) .blob { opacity: 0.08; }
     
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -64,7 +63,6 @@
     html.dark .glass-card { background: linear-gradient(180deg, rgba(28, 28, 31, 0.8) 0%, rgba(18, 18, 20, 0.9) 100%); border: 1px solid rgba(255, 255, 255, 0.03); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
 
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .text-shadow { text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
     
     img.lazy-load { transition: opacity 0.3s ease; opacity: 0; }
@@ -82,11 +80,11 @@
   <!-- Navbar -->
   <nav id="navbar" class="fixed top-0 w-full z-40 transition-all duration-300 bg-white/80 dark:bg-transparent border-b border-transparent pt-4 pb-4 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3 text-gray-900 dark:text-white font-black text-2xl md:text-3xl tracking-tight cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
-          <i class="fa-solid fa-play text-white text-sm ml-1"></i>
-        </div>
-        C-DRAMA
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <img src="jomyut_1.png" alt="Series By Night Star" class="h-10 md:h-12 w-auto object-contain rounded-md shadow-sm border border-gray-200 dark:border-white/5" onerror="this.src='https://placehold.co/100x40?text=LOGO'">
+        <span class="font-black tracking-tight hidden sm:block">NIGHTSTAR DRAMA</span>
       </div>
       
       <div class="flex items-center gap-2 md:gap-3">
@@ -108,11 +106,10 @@
           <i id="themeIcon" class="fa-solid fa-moon"></i>
         </button>
 
-        <!-- Settings -->
-        <button onclick="toggleSettings()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-brand-500 transition-colors group relative">
-          <i class="fa-solid fa-gear group-hover:rotate-90 transition-transform duration-500"></i>
-          <span id="apiKeyDot" class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-[#09090b] rounded-full"></span>
-        </button>
+        <!-- Login / User -->
+        <a href="login.html" class="w-10 h-10 rounded-full glass flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-brand-500 transition-colors" title="เข้าสู่ระบบ">
+          <i class="fa-regular fa-user"></i>
+        </a>
       </div>
     </div>
     
@@ -127,32 +124,14 @@
     </div>
   </nav>
 
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="if(event.target === this) toggleSettings()">
-    <div class="glass-card rounded-3xl w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300" id="settingsContent">
-      <button onclick="toggleSettings()" class="absolute top-5 right-5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><i class="fa-solid fa-xmark"></i></button>
-      <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-key"></i></div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">ตั้งค่าระบบ (API)</h2>
-      <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">เพื่อให้เว็บไซต์ดึงข้อมูลจริงจาก TMDB กรุณาใส่ API Read Access Token</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">TMDB API Token</label>
-          <input type="password" id="apiKeyInput" placeholder="eyJhbGciOiJIUzI1NiJ9..." class="w-full bg-gray-100 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono transition-all">
-        </div>
-        <div class="flex gap-3">
-          <button onclick="saveKey()" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-xl font-medium text-sm transition-all shadow-lg shadow-brand-500/25">บันทึกรหัส</button>
-          <button onclick="resetKey()" class="px-5 bg-gray-200 dark:bg-transparent dark:glass hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-medium text-sm transition-all border border-transparent dark:border-white/5">ล้างค่า</button>
-        </div>
-      </div>
-      <div id="apiStatusText" class="mt-4 text-center text-xs font-medium text-red-500 dark:text-red-400">สถานะ: ใช้ข้อมูลจำลอง</div>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32 min-h-screen">
     
+    <!-- Hero Banner Section -->
     <div class="mb-10 space-y-6 animate-fade-in-up">
-      <h1 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight">สำรวจ<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-orange-500 dark:from-brand-400 dark:to-orange-400">ซีรี่ย์จีน</span></h1>
+      <div class="flex justify-center md:justify-start mb-6">
+        <img src="jomyut_1.png" alt="Series By Night Star - บริการซีรีย์จีน" class="w-full max-w-md md:max-w-lg object-contain drop-shadow-2xl rounded-2xl dark:border-white/10" onerror="this.style.display='none'" />
+      </div>
       
       <div class="flex flex-col gap-4">
         <!-- Tabs & Year Filter Container -->
@@ -183,8 +162,8 @@
     </div>
 
     <!-- Feedback Area -->
-    <div id="errorBox" class="hidden mb-6 bg-red-100 dark:glass border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-5 py-4 rounded-2xl text-sm flex items-center gap-3 shadow-lg">
-      <i class="fa-solid fa-circle-exclamation text-lg"></i> <span id="errorText"></span>
+    <div id="errorBox" class="hidden mb-6 bg-red-100 dark:glass border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 px-5 py-4 rounded-2xl text-sm flex items-center gap-3 shadow-lg transition-all duration-300">
+      <i class="fa-solid fa-circle-info text-lg" id="errorIcon"></i> <span id="errorText"></span>
     </div>
     <div id="infoBar" class="text-gray-600 dark:text-gray-400 text-sm mb-6 flex items-center gap-2 font-medium"></div>
 
@@ -201,7 +180,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black/50 backdrop-blur-lg mt-12 py-8 text-center text-gray-500 text-xs md:text-sm font-light">
-    <p>C-Drama Hub Premium V2 © 2026. ข้อมูลอ้างอิงจาก TMDB API</p>
+    <p>Series By Night Star © 2026. ข้อมูลอ้างอิงจาก TMDB API</p>
   </footer>
 
   <!-- Detail Modal -->
@@ -215,7 +194,8 @@
   </div>
 
   <script>
-    /** * C-Drama Hub: Premium V2 Core
+    /** * Series By Night Star: Production Core (Netlify Backend)
+     * นำ API Key ออกจาก Frontend เพื่อความปลอดภัย 100%
      */
 
     // --- Configuration ---
@@ -224,7 +204,8 @@
       IMG_BIG: 'https://image.tmdb.org/t/p/w1280',
       IMG_LOGO: 'https://image.tmdb.org/t/p/w154',
       IMG_PROFILE: 'https://image.tmdb.org/t/p/w185',
-      BASE_URL: 'https://api.themoviedb.org/3'
+      // ชี้เป้าหมายไปที่ Netlify Function แทน TMDB โดยตรง
+      BACKEND_URL: '/.netlify/functions/tmdb' 
     };
     
     const GENRE_TH = {
@@ -247,8 +228,6 @@
 
     // --- Core State Management ---
     const appState = {
-      apiKey: localStorage.getItem('tmdb_api_key') || '',
-      isMockMode: !(localStorage.getItem('tmdb_api_key')),
       tab: 'popular',
       genre: null,
       search: '',
@@ -277,7 +256,10 @@
       modalOverlay: document.getElementById('modalOverlay'),
       modalContent: document.getElementById('modalContent'),
       actorModalOverlay: document.getElementById('actorModalOverlay'),
-      actorModalContent: document.getElementById('actorModalContent')
+      actorModalContent: document.getElementById('actorModalContent'),
+      errorBox: document.getElementById('errorBox'),
+      errorText: document.getElementById('errorText'),
+      errorIcon: document.getElementById('errorIcon')
     };
 
     // --- Initialization ---
@@ -288,7 +270,6 @@
         document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
       }
 
-      updateApiUI();
       renderNavigation();
       setupEvents();
       fetchList();
@@ -308,18 +289,24 @@
       }
     }
 
-    // --- UI Behaviors ---
-    function toggleSettings() {
-      const modal = document.getElementById('settingsModal');
-      const content = document.getElementById('settingsContent');
-      if(modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+    // --- Show Toast Message ---
+    function showToast(message, type = 'success') {
+      DOM.errorText.innerHTML = message;
+      DOM.errorBox.classList.remove('hidden');
+      
+      if (type === 'success') {
+        DOM.errorIcon.className = 'fa-solid fa-circle-check text-lg';
+        DOM.errorBox.classList.remove('bg-red-100', 'dark:border-red-500/30', 'text-red-600', 'dark:text-red-400');
+        DOM.errorBox.classList.add('bg-emerald-100', 'dark:border-emerald-500/30', 'text-emerald-700', 'dark:text-emerald-400');
       } else {
-        modal.classList.add('opacity-0'); content.classList.add('scale-95');
-        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        DOM.errorIcon.className = 'fa-solid fa-circle-exclamation text-lg';
+        DOM.errorBox.classList.add('bg-red-100', 'dark:border-red-500/30', 'text-red-600', 'dark:text-red-400');
+        DOM.errorBox.classList.remove('bg-emerald-100', 'dark:border-emerald-500/30', 'text-emerald-700', 'dark:text-emerald-400');
       }
+
+      setTimeout(() => {
+        DOM.errorBox.classList.add('hidden');
+      }, 3500);
     }
 
     function toggleMobileSearch() {
@@ -375,6 +362,14 @@
       DOM.genresContainer.innerHTML = genresHtml;
     }
 
+    // --- Backend Proxy Wrapper ---
+    async function fetchFromBackend(endpoint, queryParams = '') {
+      const url = `${TMDB.BACKEND_URL}?endpoint=${encodeURIComponent(endpoint)}${queryParams}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('API Backend Error');
+      return res.json();
+    }
+
     // --- Search & Autocomplete ---
     function handleInputSearch(e, isDesktop) {
       clearTimeout(appState.searchTimeout);
@@ -396,16 +391,9 @@
       dropdownEl.classList.remove('hidden');
       setTimeout(() => dropdownEl.classList.remove('opacity-0'), 10);
 
-      if (appState.isMockMode) {
-        const results = getMockData().filter(d => d.titleTh.toLowerCase().includes(query.toLowerCase()) || d.titleEn.toLowerCase().includes(query.toLowerCase()));
-        renderAutocompleteResults(results, dropdownEl, isDesktop);
-        return;
-      }
-
       try {
-        const url = `${TMDB.BASE_URL}/search/tv?query=${encodeURIComponent(query)}&language=th-TH`;
-        const res = await fetchApi(url);
-        let results = (res.results || []).filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN')).slice(0, 5);
+        const data = await fetchFromBackend('/search/tv', `&query=${encodeURIComponent(query)}&language=th-TH`);
+        let results = (data.results || []).filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN')).slice(0, 5);
         renderAutocompleteResults(results, dropdownEl, isDesktop);
       } catch (e) {
         dropdownEl.innerHTML = `<div class="p-3 text-center text-red-500 dark:text-red-400 text-xs">ค้นหาล้มเหลว</div>`;
@@ -421,9 +409,9 @@
       let html = results.map(s => {
         appState.autocompleteCache.set(s.id, s);
         const title = s.name || s.original_name || s.titleTh;
-        const year = s.first_air_date ? s.first_air_date.substring(0,4) : (s.year || '');
-        const imgUrl = appState.isMockMode ? s.cover : (s.poster_path ? `${TMDB.IMG_LOGO}${s.poster_path}` : `https://placehold.co/100x150/1c1c1f/475569?text=X`);
-        const rating = s.vote_average ? s.vote_average.toFixed(1) : (s.rating || 0);
+        const year = s.first_air_date ? s.first_air_date.substring(0,4) : '';
+        const imgUrl = s.poster_path ? `${TMDB.IMG_LOGO}${s.poster_path}` : `https://placehold.co/100x150/1c1c1f/475569?text=X`;
+        const rating = s.vote_average ? s.vote_average.toFixed(1) : 0;
 
         return `
         <div class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer transition-colors border-b border-gray-100 dark:border-white/5 last:border-0" onclick="hideAutocompletes(); showDetail(${s.id}, true)">
@@ -454,7 +442,7 @@
         DOM.contentGrid.innerHTML = `
           <div class="col-span-full flex flex-col items-center justify-center py-32 text-center">
             <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <p class="text-gray-500 dark:text-gray-400 text-xs tracking-widest uppercase">${appState.isMockMode ? 'Loading Mock Data...' : 'Syncing Data...'}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-xs tracking-widest uppercase">กำลังดึงข้อมูล...</p>
           </div>`;
         DOM.infoBar.innerHTML = '';
       } else {
@@ -462,27 +450,9 @@
         DOM.loadingMoreArea.classList.remove('hidden');
       }
 
-      if (appState.isMockMode) {
-        let filtered = getMockData();
-        if (appState.search) filtered = filtered.filter(d => d.titleTh.toLowerCase().includes(appState.search.toLowerCase()) || d.titleEn.toLowerCase().includes(appState.search.toLowerCase()));
-        if (appState.genre) filtered = filtered.filter(d => d.genres.includes(appState.genre) || d.genres.includes(parseInt(appState.genre)));
-        if (appState.year) filtered = filtered.filter(d => d.year == appState.year);
-        
-        appState.totalPages = 1;
-        filtered.forEach(item => appState.cachedData.set(item.id, item));
-        
-        setTimeout(() => {
-            renderGrid(filtered, filtered.length, isAppend);
-            if(!document.getElementById('mockBanner')) DOM.infoBar.innerHTML += `<span id="mockBanner" class="ml-auto bg-brand-100 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 text-xs px-3 py-1 rounded-full border border-brand-200 dark:border-brand-500/20">ระบบจำลองข้อมูล</span>`;
-            appState.isLoading = false;
-            appState.isLoadingMore = false;
-        }, 300); // Fake delay for mock
-        return;
-      }
-
       try {
-        const url = buildApiUrl();
-        const data = await fetchApi(url);
+        const { endpoint, params } = buildApiParams();
+        const data = await fetchFromBackend(endpoint, params);
         
         let results = (data.results || []).filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN'));
         if (!appState.search) results = results.filter(s => s.poster_path); 
@@ -494,7 +464,7 @@
         lazyFetchDetails(results);
 
       } catch (e) {
-        if (!isAppend) DOM.contentGrid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 dark:text-red-400 bg-white dark:glass rounded-2xl shadow">ขัดข้องในการเชื่อมต่อระบบ</div>';
+        if (!isAppend) DOM.contentGrid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 dark:text-red-400 bg-white dark:glass rounded-2xl shadow">ขัดข้องในการเชื่อมต่อระบบหลังบ้าน (API Proxy)</div>';
       } finally {
         appState.isLoading = false;
         appState.isLoadingMore = false;
@@ -502,8 +472,13 @@
       }
     }
 
-    function buildApiUrl() {
-      if (appState.search) return `${TMDB.BASE_URL}/search/tv?query=${encodeURIComponent(appState.search)}&page=${appState.page}&first_air_date_year=${appState.year}&language=th-TH`;
+    function buildApiParams() {
+      if (appState.search) {
+        return {
+          endpoint: '/search/tv',
+          params: `&query=${encodeURIComponent(appState.search)}&page=${appState.page}&first_air_date_year=${appState.year}&language=th-TH`
+        };
+      }
       
       let sortAndFilter = 'sort_by=popularity.desc';
       const d = new Date();
@@ -526,18 +501,21 @@
 
       let yearFilter = appState.year ? `&first_air_date_year=${appState.year}` : '';
 
-      return `${TMDB.BASE_URL}/discover/tv?with_original_language=zh&with_origin_country=CN&${sortAndFilter}${genreFilter}${yearFilter}&page=${appState.page}&language=th-TH`;
+      return {
+        endpoint: '/discover/tv',
+        params: `&with_original_language=zh&with_origin_country=CN&${sortAndFilter}${genreFilter}${yearFilter}&page=${appState.page}&language=th-TH`
+      };
     }
 
     async function lazyFetchDetails(results) {
       results.forEach(async (s) => {
         try {
-          const detail = await fetchApi(`${TMDB.BASE_URL}/tv/${s.id}?language=th-TH&append_to_response=watch/providers`);
+          const detail = await fetchFromBackend(`/tv/${s.id}`, `&language=th-TH&append_to_response=watch/providers`);
           appState.cachedData.set(s.id, { ...s, ...detail }); 
           
           const badgeEl = document.getElementById(`badge-ep-${s.id}`);
           if (badgeEl) {
-            badgeEl.innerHTML = getEpisodeStatusText(detail, false, true);
+            badgeEl.innerHTML = getEpisodeStatusText(detail, true);
             badgeEl.classList.remove('opacity-50', 'animate-pulse');
           }
         } catch (e) {}
@@ -554,14 +532,12 @@
 
       const html = shows.map((s, idx) => {
         const title = s.name || s.original_name || s.titleTh;
-        const year = s.first_air_date ? s.first_air_date.substring(0,4) : (s.year || '');
-        const imgUrl = appState.isMockMode ? s.cover : (s.poster_path ? `${TMDB.IMG_500}${s.poster_path}` : `https://placehold.co/400x600/1c1c1f/475569?text=No+Poster`);
-        const rating = s.vote_average ? s.vote_average.toFixed(1) : (s.rating || 0);
+        const year = s.first_air_date ? s.first_air_date.substring(0,4) : '';
+        const imgUrl = s.poster_path ? `${TMDB.IMG_500}${s.poster_path}` : `https://placehold.co/400x600/1c1c1f/475569?text=No+Poster`;
+        const rating = s.vote_average ? s.vote_average.toFixed(1) : 0;
         
-        const badgeState = appState.isMockMode 
-          ? getEpisodeStatusText(s, true, true) 
-          : `<i class="fa-solid fa-spinner fa-spin"></i> โหลดข้อมูล`;
-        const badgeClasses = appState.isMockMode ? '' : 'opacity-50 animate-pulse';
+        const badgeState = `<i class="fa-solid fa-spinner fa-spin"></i> โหลดข้อมูล`;
+        const badgeClasses = 'opacity-50 animate-pulse';
 
         return `
           <div class="group cursor-pointer animate-fade-in-up" style="animation-delay: ${(idx % 20) * 15}ms" onclick="showDetail(${s.id})">
@@ -578,7 +554,7 @@
             </div>
             <div class="px-1">
               <h3 class="text-gray-900 dark:text-gray-100 font-semibold text-sm line-clamp-2 leading-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">${title}</h3>
-              <p class="text-gray-500 text-xs mt-1">${year} ${appState.isMockMode?'':'• 🇨🇳'}</p>
+              <p class="text-gray-500 text-xs mt-1">${year} • 🇨🇳</p>
             </div>
           </div>`;
       }).join('');
@@ -603,16 +579,10 @@
       
       DOM.modalContent.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center"><div class="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-4"></div></div>`;
 
-      if (appState.isMockMode) {
-        renderModal(s, true);
-        return;
-      }
-
       try {
-        // Fetch recommendations too!
-        const detail = await fetchApi(`${TMDB.BASE_URL}/tv/${id}?language=th-TH&append_to_response=watch/providers,credits,recommendations`);
+        const detail = await fetchFromBackend(`/tv/${id}`, `&language=th-TH&append_to_response=watch/providers,credits,recommendations`);
         appState.cachedData.set(id, detail);
-        renderModal(detail, false);
+        renderModal(detail);
       } catch (e) {
         DOM.modalContent.innerHTML = `<button onclick="closeModal(event, true)" class="absolute top-4 right-4 z-20 bg-gray-200 dark:glass text-gray-800 dark:text-white w-10 h-10 rounded-full"><i class="fa-solid fa-xmark"></i></button><div class="flex h-full items-center justify-center text-red-500">ดึงข้อมูลไม่สำเร็จ</div>`;
       }
@@ -623,25 +593,28 @@
       if (navigator.share) {
         navigator.share({ title: `แนะนำซีรี่ย์จีน: ${title}`, text: `ดูรายละเอียดซีรี่ย์ ${title} บน TMDB`, url: url }).catch(console.error);
       } else {
-        navigator.clipboard.writeText(url);
-        alert('คัดลอกลิงก์ TMDB เรียบร้อยแล้ว!');
+        const tempInput = document.createElement("input");
+        tempInput.value = url;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        showToast('คัดลอกลิงก์สำเร็จแล้ว!', 'success');
       }
     }
 
-    function renderModal(d, isMock) {
+    function renderModal(d) {
       const title = d.name || d.titleTh;
       const originalTitle = d.original_name || d.titleEn || '';
-      const imgUrl = isMock ? d.cover : (d.poster_path ? `${TMDB.IMG_BIG}${d.poster_path}` : `https://placehold.co/600x900/1c1c1f/475569?text=No+Image`);
-      const rating = d.vote_average ? d.vote_average.toFixed(1) : (d.rating || 0);
-      const year = d.first_air_date ? d.first_air_date.substring(0,4) : (d.year || '');
+      const imgUrl = d.poster_path ? `${TMDB.IMG_BIG}${d.poster_path}` : `https://placehold.co/600x900/1c1c1f/475569?text=No+Image`;
+      const rating = d.vote_average ? d.vote_average.toFixed(1) : 0;
+      const year = d.first_air_date ? d.first_air_date.substring(0,4) : '';
       
-      const episodeStatusHtml = getEpisodeStatusText(d, isMock, false);
+      const episodeStatusHtml = getEpisodeStatusText(d, false);
       
-      // Cast with clickable links
+      // Cast
       let castHtml = '';
-      if (isMock && d.cast) {
-        castHtml = d.cast.map(c => `<span class="cursor-pointer hover:text-brand-500 underline decoration-brand-500/30 decoration-dashed underline-offset-4 mr-2" onclick="alert('โปรไฟล์จำลอง: ${c}')">${c}</span>`).join('');
-      } else if (!isMock && d.credits?.cast?.length > 0) {
+      if (d.credits?.cast?.length > 0) {
         castHtml = d.credits.cast.slice(0, 6).map(c => `<span class="cursor-pointer hover:text-brand-500 underline decoration-brand-500/30 decoration-dashed underline-offset-4 mr-3" onclick="showActor(${c.id})">${c.name}</span>`).join('');
       }
 
@@ -650,14 +623,7 @@
       let hasThaiDub = false;
       const dubPlatforms = ['WeTV', 'iQIYI', 'TrueID', 'Viu', 'Netflix', 'Monomax']; 
 
-      if (isMock && d.providers) {
-        providersHtml = d.providers.map(p => `
-          <div class="flex items-center gap-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-1 pr-3 shadow-sm">
-            <img src="https://image.tmdb.org/t/p/original${p.logo_path}" class="w-8 h-8 rounded-lg object-cover" alt="">
-            <span class="text-xs text-gray-800 dark:text-gray-200 font-medium">${p.provider_name}</span>
-          </div>`).join('');
-        hasThaiDub = true;
-      } else if (!isMock && d.watch?.providers?.results?.TH) {
+      if (d.watch?.providers?.results?.TH) {
         const th = d.watch.providers.results.TH;
         const allProviders = [...(th.flatrate || []), ...(th.free || [])].reduce((acc, cur) => acc.find(i => i.provider_id === cur.provider_id) ? acc : [...acc, cur], []); 
         
@@ -683,16 +649,16 @@
         }).join('');
       }
 
-      if(!isMock && d.popularity > 500 && (!providersHtml && !fallbackNetworkHtml)) hasThaiDub = true; 
+      if(d.popularity > 500 && (!providersHtml && !fallbackNetworkHtml)) hasThaiDub = true; 
 
       const genresHtml = (d.genres || []).map(g => {
-        let nameObj = isMock ? (GENRE_TH[g] || {name: g, icon:''}) : (GENRE_TH[g.id] || {name: g.name, icon:''});
-        return `<span class="flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-xs text-gray-700 dark:text-gray-300">${nameObj.icon || ''}${nameObj.name || (isMock ? g : g.name)}</span>`;
+        let nameObj = GENRE_TH[g.id] || {name: g.name, icon:''};
+        return `<span class="flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-xs text-gray-700 dark:text-gray-300">${nameObj.icon || ''}${nameObj.name || g.name}</span>`;
       }).join('');
 
       // Recommendations
       let recsHtml = '';
-      if (!isMock && d.recommendations?.results?.length > 0) {
+      if (d.recommendations?.results?.length > 0) {
         const recs = d.recommendations.results.filter(r => r.original_language === 'zh' || (r.origin_country || []).includes('CN')).slice(0, 10);
         if (recs.length > 0) {
             recsHtml = `
@@ -779,12 +745,10 @@
         DOM.actorModalContent.innerHTML = `<div class="p-12 text-center"><div class="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div></div>`;
 
         try {
-            const data = await fetchApi(`${TMDB.BASE_URL}/person/${personId}?language=th-TH&append_to_response=tv_credits`);
+            const data = await fetchFromBackend(`/person/${personId}`, `&language=th-TH&append_to_response=tv_credits`);
             
             const imgUrl = data.profile_path ? `${TMDB.IMG_PROFILE}${data.profile_path}` : 'https://placehold.co/185x278/1c1c1f/475569?text=No+Photo';
-            const gender = data.gender === 1 ? 'หญิง' : data.gender === 2 ? 'ชาย' : '-';
             
-            // Filter only Chinese Dramas for their credits
             let tvCredits = (data.tv_credits?.cast || [])
                 .filter(s => s.original_language === 'zh' || (s.origin_country || []).includes('CN'))
                 .sort((a,b) => b.popularity - a.popularity)
@@ -797,7 +761,7 @@
                     <h4 class="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-film text-brand-500"></i> ผลงานซีรี่ย์เด่น</h4>
                     <div class="flex gap-3 overflow-x-auto custom-scrollbar pb-3">
                         ${tvCredits.map(c => {
-                            appState.cachedData.set(c.id, c); // Cache for quick detail view
+                            appState.cachedData.set(c.id, c);
                             return `
                             <div class="shrink-0 w-24 cursor-pointer group" onclick="closeActorModal(); showDetail(${c.id})">
                                 <div class="aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-gray-200 dark:bg-surface shadow">
@@ -849,18 +813,7 @@
     }
 
     // --- Utilities ---
-    async function fetchApi(url) {
-      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${appState.apiKey}`, 'accept': 'application/json' }});
-      if (res.status === 401) { resetKey(); toggleSettings(); throw new Error('Unauthorized'); }
-      return res.json();
-    }
-
-    function getEpisodeStatusText(d, isMock, isCard) {
-      if (isMock) {
-        if (d.status === 'Ended') return isCard ? `จบแล้ว ${d.episodes}` : `จบแล้ว (${d.episodes} ตอน)`;
-        return isCard ? `ออนแอร์ ${d.airedEpisodes}/${d.episodes}` : `ออนแอร์ไปแล้ว ${d.airedEpisodes}/${d.episodes} ตอน`;
-      } 
-      
+    function getEpisodeStatusText(d, isCard) {
       const isEnded = d.status === 'Ended' || d.status === 'Canceled';
       const totalEps = d.number_of_episodes || '?';
       
@@ -888,26 +841,6 @@
           document.body.style.overflow = ''; 
         }, 300);
       }
-    }
-
-    function updateApiUI() {
-      appState.isMockMode = !appState.apiKey;
-      document.getElementById('apiKeyDot').className = `absolute top-0 right-0 w-3 h-3 border-2 border-white dark:border-[#09090b] rounded-full ${appState.apiKey ? 'bg-emerald-500' : 'bg-red-500'}`;
-      document.getElementById('apiStatusText').innerHTML = appState.apiKey ? '<span class="text-emerald-500 dark:text-emerald-400"><i class="fa-solid fa-circle-check"></i> เชื่อมต่อฐานข้อมูลจริง</span>' : '<span class="text-red-500 dark:text-red-400">ใช้ข้อมูลจำลอง (Mock Data)</span>';
-      document.getElementById('apiKeyInput').value = appState.apiKey;
-    }
-
-    function saveKey() {
-      const val = document.getElementById('apiKeyInput').value.trim();
-      if (!val) return;
-      appState.apiKey = val;
-      localStorage.setItem('tmdb_api_key', val);
-      updateApiUI(); updateFilter({page: 1}); setTimeout(toggleSettings, 300);
-    }
-
-    function resetKey() {
-      appState.apiKey = ''; localStorage.removeItem('tmdb_api_key');
-      updateApiUI(); updateFilter({page: 1});
     }
 
     function setupEvents() {
@@ -939,7 +872,7 @@
 
       // Infinite Scroll Logic
       window.addEventListener('scroll', () => {
-        if (DOM.modalOverlay.classList.contains('flex') || DOM.actorModalOverlay.classList.contains('flex')) return; // Disable scroll fetch if modal open
+        if (DOM.modalOverlay.classList.contains('flex') || DOM.actorModalOverlay.classList.contains('flex')) return; 
         
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 600) {
             if (!appState.isLoading && !appState.isLoadingMore && appState.page < appState.totalPages) {
@@ -948,14 +881,6 @@
             }
         }
       });
-    }
-
-    function getMockData() {
-      return [
-        { id: 1, titleTh: "หาญท้าชะตาฟ้า ปริศนายุทธจักร", titleEn: "Joy of Life", cover: "https://image.tmdb.org/t/p/w500/yJ0D7aFh0Y4BwGqWjWJpG5z5y2j.jpg", rating: 8.8, status: "Returning Series", year: "2019", episodes: 46, airedEpisodes: 30, genres: [18, 10765, 'historical'], synopsis: "ฟ่านเสียน ชายหนุ่มผู้มีภูมิหลังลึกลับ เติบโตมาพร้อมกับความรู้จากยุคปัจจุบัน...", providers: [{logo_path: "/xS3tWwB7T4kofO90oN1Z8Qz7T8y.jpg", provider_name: "WeTV"}], cast: ["จางรั่วอวิ๋น", "หลี่ชิ่น", "เฉินเต้าหมิง"] },
-        { id: 2, titleTh: "แอบรักให้เธอรู้", titleEn: "Hidden Love", cover: "https://image.tmdb.org/t/p/w500/yF1eOkaXXibxHEcDFvS14n1tWjG.jpg", rating: 8.6, status: "Ended", year: "2023", episodes: 25, airedEpisodes: 25, genres: [10749, 35], synopsis: "ซางจื้อ แอบชอบเพื่อนของพี่ชายมาตั้งแต่เด็ก ความรักวัยรุ่นที่เติบโตเป็นความรักที่มั่นคง...", providers: [{logo_path: "/e2qD0mP1wK4J1FzQZ9f9TzQ3G1y.jpg", provider_name: "Netflix"}], cast: ["จ้าวลู่ซือ", "เฉินเจ๋อหยวน", "หม่าป๋อเชียน"] },
-        { id: 3, titleTh: "สื่อรักปีศาจจิ้งจอก", titleEn: "Fox Spirit Matchmaker", cover: "https://image.tmdb.org/t/p/w500/m1wPjZq9W8zX8K9p6p5oWjZq9W8.jpg", rating: 8.0, status: "Ended", year: "2024", episodes: 36, airedEpisodes: 36, genres: [10765, 'historical'], synopsis: "เรื่องราวความรักระหว่างมนุษย์และปีศาจจิ้งจอก...", providers: [{logo_path: "/qIqO1gZq9W8zX8K9p6p5oWjZq9W8.jpg", provider_name: "iQIYI"}], cast: ["หยางมี่", "กงจวิ้น", "กัวเสี่ยวถิง"] }
-      ];
     }
 
     // Run
